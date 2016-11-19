@@ -1,0 +1,2 @@
+# whiteboard
+Minimalistic whiteboard app.
