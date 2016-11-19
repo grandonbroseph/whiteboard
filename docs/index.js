@@ -8,6 +8,8 @@ var Whiteboard = (function () {
       parentRect: null,
       canvasRect: null,
       color: "black",
+      undoHistory: [],
+      redoHistory: [],
       children:  [],
       callbacks: {},
       emit: function (event, data) {
@@ -25,6 +27,25 @@ var Whiteboard = (function () {
           callbackList = whiteboard.callbacks[event] = [];
         }
         callbackList.push(callback);
+      },
+      undo: function() {
+        if (whiteboard.undoHistory.length) {
+          var index = whiteboard.undoHistory.pop();
+          whiteboard.redoHistory.push(whiteboard.children.splice(index, whiteboard.children.length - index));
+          redrawWhiteboard(whiteboard);
+        } else {
+          console.log("Nothing to undo.");
+        }
+      },
+      redo: function() {
+        if (whiteboard.redoHistory.length) {
+          var segment = whiteboard.redoHistory.pop();
+          whiteboard.undoHistory.push(whiteboard.children.length);
+          whiteboard.children = whiteboard.children.concat(segment);
+          redrawWhiteboard(whiteboard);
+        } else {
+          console.log("Nothing to redo.");
+        }
       },
       drawLine: function(from, to, color) {
         color = color || whiteboard.color;
@@ -45,30 +66,41 @@ var Whiteboard = (function () {
       var y = (event.pageY - parentRect.top)  / canvasRect.height;
       return [x, y]
     }
-    // var events = ["mousedown", "mousemove", "mouseup"]
-    // var eventName, i = events.length
-    // while (i--) {
-    //   var eventName = events[i]
-    //   canvas.addEventListener(eventName, function (event) {
-    //     whiteboard.emit(eventName, {
-    //       pos: getMousePos(event)
-    //     })
-    //   })
-    // }
+    var clicked = false;
     canvas.addEventListener("mousedown", function (event) {
+      clicked = true;
       whiteboard.emit("mousedown", {
         pos: getMousePos(event)
       });
     });
-    canvas.addEventListener("mousemove", function (event) {
-      whiteboard.emit("mousemove", {
-        pos: getMousePos(event)
-      });
+    window.addEventListener("mousemove", function (event) {
+      if (clicked) {
+        whiteboard.emit("mousemove", {
+          pos: getMousePos(event)
+        });
+      }
     });
-    canvas.addEventListener("mouseup", function (event) {
-      whiteboard.emit("mouseup", {
-        pos: getMousePos(event)
+    window.addEventListener("mouseup", function (event) {
+      if (clicked) {
+        whiteboard.emit("mouseup", {
+          pos: getMousePos(event)
+        });
+      }
+      clicked = false;
+    });
+    window.addEventListener("keydown", function (event) {
+      whiteboard.emit("keydown", {
+        code: event.code
       });
+      if (event.ctrlKey) {
+        if (event.code === "KeyZ") {
+          whiteboard.emit("undo");
+        }
+        if (event.code === "KeyR") {
+          event.preventDefault();
+          whiteboard.emit("redo");
+        }
+      }
     });
     return whiteboard
   }
@@ -78,6 +110,9 @@ var Whiteboard = (function () {
     canvas.width = parentRect.width;
     canvas.height = parentRect.height;
     whiteboard.canvasRect = whiteboard.canvas.getBoundingClientRect();
+    redrawWhiteboard(whiteboard);
+  }
+  function redrawWhiteboard(whiteboard) {
     clearWhiteboard(whiteboard);
     drawWhiteboard(whiteboard);
   }
@@ -154,6 +189,8 @@ var start;
 var last;
 whiteboard.on("mousedown", function (mouse) {
   start = last = mouse.pos; // Mark current mouse position
+  whiteboard.undoHistory.push(whiteboard.children.length);
+  whiteboard.redoHistory.length = 0;
 });
 
 whiteboard.on("mousemove", function (mouse) {
@@ -169,4 +206,12 @@ whiteboard.on("mouseup", function (mouse) {
     whiteboard.drawLine(last, mouse.pos); // Draw one last time
     start = last = null;                  // We're done drawing, so discard draw coordinates
   }
+});
+
+whiteboard.on("undo", function () {
+  whiteboard.undo();
+});
+
+whiteboard.on("redo", function () {
+  whiteboard.redo();
 });
