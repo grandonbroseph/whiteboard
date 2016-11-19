@@ -1,0 +1,42 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  background: whitesmoke;
+}
+
+#wrap {
+  position: relative;
+  width: 100vw;
+  margin: auto;
+  font-size: 1vw;
+  box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.25);
+}
+
+#wrap::before {
+  content: '';
+  display: block;
+  padding: calc(100% * 3 / 4) 0 0;
+}
+
+.whiteboard {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+@media (min-aspect-ratio: 4 / 3) {
+  #wrap {
+    width: calc(100vh * 4 / 3);
+    height: 100vh;
+    font-size: 1vh;
+  }
+}
