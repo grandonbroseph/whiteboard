@@ -7,7 +7,9 @@ export default (function () {
       parent:     canvas.parentNode,
       parentRect: null,
       canvasRect: null,
-      color: "black",
+      brushColor: "black",
+      brushSize:  1,
+      brushSizeRange: [0.25, 4],
       undoHistory: [],
       redoHistory: [],
       children:  [],
@@ -47,13 +49,15 @@ export default (function () {
           console.log("Nothing to redo.")
         }
       },
-      drawLine: function(from, to, color) {
-        color = color || whiteboard.color
+      drawLine: function(from, to, color, width) {
+        color = color || whiteboard.brushColor
+        width = typeof width !== "undefined" ? width : whiteboard.brushSize
         var line = {
           type:  "line",
           from:  from,
           to:    to,
-          color: color
+          color: color,
+          width: (width / 100) * whiteboard.canvasRect.width
         }
         whiteboard.children.push(line)
         drawLine(whiteboard, line)
@@ -92,7 +96,7 @@ export default (function () {
       whiteboard.emit("keydown", {
         code: event.code
       })
-      if (event.ctrlKey) {
+      if (event.ctrlKey && !event.shiftKey) {
         if (event.code === "KeyZ") {
           whiteboard.emit("undo")
         }
@@ -141,8 +145,8 @@ export default (function () {
     var fromY = line.from[1] * h
     var toX   = line.to[0] * w
     var toY   = line.to[1] * h
-    ctx.lineStyle = line.color
-    ctx.lineWidth = Math.round(0.025 * w)
+    ctx.strokeStyle = line.color
+    ctx.lineWidth = line.width
     ctx.lineCap = "round"
     ctx.beginPath()
     ctx.moveTo(fromX, fromY)

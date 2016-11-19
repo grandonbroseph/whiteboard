@@ -7,7 +7,9 @@ var Whiteboard = (function () {
       parent:     canvas.parentNode,
       parentRect: null,
       canvasRect: null,
-      color: "black",
+      brushColor: "black",
+      brushSize:  1,
+      brushSizeRange: [0.25, 4],
       undoHistory: [],
       redoHistory: [],
       children:  [],
@@ -47,13 +49,15 @@ var Whiteboard = (function () {
           console.log("Nothing to redo.");
         }
       },
-      drawLine: function(from, to, color) {
-        color = color || whiteboard.color;
+      drawLine: function(from, to, color, width) {
+        color = color || whiteboard.brushColor;
+        width = typeof width !== "undefined" ? width : whiteboard.brushSize;
         var line = {
           type:  "line",
           from:  from,
           to:    to,
-          color: color
+          color: color,
+          width: (width / 100) * whiteboard.canvasRect.width
         };
         whiteboard.children.push(line);
         drawLine(whiteboard, line);
@@ -92,7 +96,7 @@ var Whiteboard = (function () {
       whiteboard.emit("keydown", {
         code: event.code
       });
-      if (event.ctrlKey) {
+      if (event.ctrlKey && !event.shiftKey) {
         if (event.code === "KeyZ") {
           whiteboard.emit("undo");
         }
@@ -141,8 +145,8 @@ var Whiteboard = (function () {
     var fromY = line.from[1] * h;
     var toX   = line.to[0] * w;
     var toY   = line.to[1] * h;
-    ctx.lineStyle = line.color;
-    ctx.lineWidth = Math.round(0.025 * w);
+    ctx.strokeStyle = line.color;
+    ctx.lineWidth = line.width;
     ctx.lineCap = "round";
     ctx.beginPath();
     ctx.moveTo(fromX, fromY);
@@ -183,12 +187,23 @@ var Whiteboard = (function () {
   return Whiteboard
 }());
 
-var whiteboard = Whiteboard.create("#wrap");
+var whiteboard = Whiteboard.create("#whiteboard");
+
+function getSize() {
+  // var now = Date.now()
+  // var ratio = (now - then) / offset
+  // if (ratio > 1)
+  //   ratio = 1
+  // var size = whiteboard.brushSize * ratio
+  return whiteboard.brushSize
+}
 
 var start;
 var last;
+var then;
 whiteboard.on("mousedown", function (mouse) {
   start = last = mouse.pos; // Mark current mouse position
+  then = Date.now();
   whiteboard.undoHistory.push(whiteboard.children.length);
   whiteboard.redoHistory.length = 0;
 });
@@ -196,15 +211,16 @@ whiteboard.on("mousedown", function (mouse) {
 whiteboard.on("mousemove", function (mouse) {
   var pos = mouse.pos;
   if (start) { // If we're currently drawing...
-    whiteboard.drawLine(last, pos);
+    whiteboard.drawLine(last, pos, undefined, getSize());
     last = pos;
   }
 });
 
 whiteboard.on("mouseup", function (mouse) {
-  if (start) {                           // If we're currently drawing...
-    whiteboard.drawLine(last, mouse.pos); // Draw one last time
-    start = last = null;                  // We're done drawing, so discard draw coordinates
+  var now = Date.now();
+  if (start) { // If we're currently drawing...
+    whiteboard.drawLine(last, mouse.pos, undefined, getSize()); // Draw one last time
+    start = last = null; // We're done drawing, so discard draw coordinates
   }
 });
 
@@ -215,3 +231,23 @@ whiteboard.on("undo", function () {
 whiteboard.on("redo", function () {
   whiteboard.redo();
 });
+
+var range = document.getElementById("range");
+range.addEventListener("input", function() {
+  whiteboard.brushSize = range.value;
+  console.log(whiteboard.brushSize);
+});
+
+function onclick(event) {
+  var label = event.target.nextSibling.nextSibling;
+  var color = window.getComputedStyle(label)["background-color"];
+  whiteboard.brushColor = color;
+}
+
+var palette = document.palette;
+var color;
+var i = palette.length;
+while (i--) {
+  color = palette[i];
+  color.addEventListener("click", onclick);
+}

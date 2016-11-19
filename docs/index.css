@@ -4,16 +4,103 @@
   box-sizing: border-box;
 }
 
-html, body {
+html, body, #wrap {
   height: 100%;
 }
 
-body {
+#wrap {
+  width: 100%;
   display: flex;
-  background: whitesmoke;
+  background: ghostwhite;
 }
 
-#wrap {
+#toolbox {
+  background: #333;
+  padding: 8px;
+}
+
+#range {
+  margin: 32px;
+  width: 8px;
+  height: 80px;
+  writing-mode: bt-lr;
+  -webkit-appearance: slider-vertical;
+}
+
+input[name="palette"] {
+  display: none;
+}
+
+.color {
+  padding: 4px;
+}
+
+#palette {
+  display: flex;
+  flex-flow: wrap;
+  width: 72px;
+  /*padding: 8px;*/
+}
+
+label {
+  display: block;
+  width: 16px;
+  height: 16px;
+  outline: thin solid darkgray;
+  outline-offset: 1px;
+}
+
+label:hover {
+  cursor: pointer;
+  outline-color: white;
+}
+
+label:active {
+  outline-color: gray;
+}
+
+input[type="radio"]:checked + label  {
+  outline-color: yellow;
+}
+
+label[for="color-white"] {
+  background: white;
+}
+
+label[for="color-gray"] {
+  background: gray;
+}
+
+
+label[for="color-black"] {
+  background: black;
+}
+
+label[for="color-red"] {
+  background: crimson;
+}
+
+label[for="color-yellow"] {
+  background: gold;
+}
+
+label[for="color-green"] {
+  background: seagreen;
+}
+
+label[for="color-blue"] {
+  background: dodgerblue;
+}
+
+label[for="color-purple"] {
+  background: rebeccapurple;
+}
+
+label[for="color-orange"] {
+  background: orangered;
+}
+
+#whiteboard {
   position: relative;
   width: 100vw;
   margin: auto;
@@ -21,7 +108,7 @@ body {
   box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.25);
 }
 
-#wrap::before {
+#whiteboard::before {
   content: '';
   display: block;
   padding: calc(100% * 3 / 4) 0 0;
@@ -31,10 +118,13 @@ body {
   position: absolute;
   left: 0;
   top: 0;
+  webkit-user-select: none;
+  user-select: none;
+  cursor: default;
 }
 
 @media (min-aspect-ratio: 4 / 3) {
-  #wrap {
+  #whiteboard {
     width: calc(100vh * 4 / 3);
     height: 100vh;
     font-size: 1vh;

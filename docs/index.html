@@ -6,7 +6,58 @@
     <title>Whiteboard</title>
   </head>
   <body>
-    <div id="wrap"></div>
+    <div id="wrap">
+      <div id="toolbox">
+        <form id="palette" name="palette">
+          <div class="color">
+            <input type="radio" name="palette" id="color-black" checked/>
+            <label class="radio" for="color-black"></label>
+          </div>
+
+          <div class="color">
+            <input type="radio" name="palette" id="color-gray"/>
+            <label class="radio" for="color-gray"></label>
+          </div>
+
+          <div class="color">
+            <input type="radio" name="palette" id="color-white"/>
+            <label class="radio" for="color-white"></label>
+          </div>
+
+          <div class="color">
+            <input type="radio" name="palette" id="color-red"/>
+            <label class="radio" for="color-red"></label>
+          </div>
+
+          <div class="color">
+            <input type="radio" name="palette" id="color-orange"/>
+            <label class="radio" for="color-orange"></label>
+          </div>
+
+          <div class="color">
+            <input type="radio" name="palette" id="color-yellow"/>
+            <label class="radio" for="color-yellow"></label>
+          </div>
+
+          <div class="color">
+            <input type="radio" name="palette" id="color-green"/>
+            <label class="radio" for="color-green"></label>
+          </div>
+
+          <div class="color">
+            <input type="radio" name="palette" id="color-blue"/>
+            <label class="radio" for="color-blue"></label>
+          </div>
+
+          <div class="color">
+            <input type="radio" name="palette" id="color-purple"/>
+            <label class="radio" for="color-purple"></label>
+          </div>
+        </form>
+        <input id="range" type="range" orient="vertical" min="0.25" max="4" step="0.05"/>
+      </div>
+      <div id="whiteboard"></div>
+    </div>
     <script src="index.js"></script>
   </body>
 </html>
